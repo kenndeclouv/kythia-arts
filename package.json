@@ -1,0 +1,52 @@
+{
+	"name": "kythia-arts",
+	"version": "0.1.0-beta",
+	"description": "Kythia Arts is a library for creating custom cards with Discord style",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"author": {
+		"name": "kenndeclouv",
+		"email": "kenndeclouv@gmail.com"
+	},
+	"license": "CC BY-NC 4.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/kenndeclouv/kythia-arts.git"
+	},
+	"files": [
+		"dist",
+		"public"
+	],
+	"scripts": {
+		"build": "tsc",
+		"dev": "bun format && rm -rf ./dist && bun run build && yalc push",
+		"format": "biome format --write .",
+		"fix": "biome check --write .",
+		"prepublishOnly": "npm run build"
+	},
+	"dependencies": {
+		"@napi-rs/canvas": "^0.1.33",
+		"node-fetch": "^2.6.7"
+	},
+	"keywords": [
+		"kythia",
+		"kenndeclouv",
+		"arts",
+		"card",
+		"discord",
+		"canvas",
+		"leveling",
+		"rank",
+		"welcome",
+		"leave",
+		"custom",
+		"kythia-arts",
+		"banner"
+	],
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.10",
+		"@types/node": "^25.0.3",
+		"@types/node-fetch": "^2.6.13",
+		"typescript": "^5.9.3"
+	}
+}
