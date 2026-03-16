@@ -83,25 +83,26 @@ export async function genWelcomeBase(
 export async function genWelcomeAvatar(
 	avatarUrl: string,
 	options: WelcomeOptions,
+	hasFrame = false,
 ): Promise<Canvas> {
 	const { width, height } = getWelcomeCanvasDimensions(options);
 	const canvas = createCanvas(width, height);
 	const ctx = canvas.getContext('2d');
 
-	const avatarSize = options?.avatarSize ?? 200;
+	const avatarSize = options?.avatarSize ?? 220;
 	const avatarRadius = avatarSize / 2;
 
 	// Avatar position (center horizontally, custom Y or default)
 	const avatarX = width / 2;
-	const avatarY = options?.avatarY ?? 60;
+	const avatarY = options?.avatarY ?? 80;
 
 	// Load avatar
 	const avatar = await loadImage(avatarUrl);
 
-	// Draw avatar border
+	// Draw avatar border if no frame overlay
 	const borderConfig = options?.avatarBorder ?? { width: 8, color: '#FFFFFF' };
 
-	if (borderConfig.width > 0) {
+	if (!hasFrame && borderConfig.width > 0) {
 		ctx.strokeStyle = parseHex(borderConfig.color);
 		ctx.lineWidth = borderConfig.width;
 		ctx.beginPath();
@@ -131,6 +132,37 @@ export async function genWelcomeAvatar(
 		avatarSize,
 	);
 	ctx.restore();
+
+	return canvas;
+}
+
+/**
+ * Generate welcome avatar frame decoration
+ */
+export async function genWelcomeAvatarFrame(
+	frameUrl: string,
+	options: WelcomeOptions,
+): Promise<Canvas> {
+	const { width, height } = getWelcomeCanvasDimensions(options);
+	const canvas = createCanvas(width, height);
+	const ctx = canvas.getContext('2d');
+
+	const avatarSize = options?.avatarSize ?? 220;
+	// Profile.ts uses 225 avatar and 269 frame = ~1.1955x scale ratio
+	const frameSize = avatarSize * (269 / 225);
+
+	// The avatar's center point in genWelcomeAvatar is (avatarX, avatarY + avatarRadius)
+	const avatarRadius = avatarSize / 2;
+	const centerX = width / 2;
+	const centerY = (options?.avatarY ?? 80) + avatarRadius;
+
+	const frameX = centerX - frameSize / 2;
+	const frameY = centerY - frameSize / 2;
+
+	if (frameUrl) {
+		const avatarFrame = await loadImage(frameUrl);
+		ctx.drawImage(avatarFrame, frameX, frameY, frameSize, frameSize);
+	}
 
 	return canvas;
 }

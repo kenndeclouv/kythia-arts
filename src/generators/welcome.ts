@@ -1,7 +1,6 @@
 import { genWelcomeBanner } from '../composers/welcome';
 import { KythiaArtsError } from '../errors';
 import { fetchUserData as fetchFromDiscord } from '../services/discord-api';
-import { fetchUserData as fetchFromLanyard } from '../services/lanyard-api';
 import type { WelcomeOptions } from '../types';
 
 /**
@@ -12,7 +11,7 @@ import type { WelcomeOptions } from '../types';
  */
 export async function welcomeBanner(
 	userId: string,
-	options: WelcomeOptions = {},
+	options: WelcomeOptions,
 ): Promise<Buffer> {
 	if (!userId || typeof userId !== 'string') {
 		throw new KythiaArtsError(
@@ -20,11 +19,14 @@ export async function welcomeBanner(
 		);
 	}
 
+	if (!options.botToken) {
+		throw new KythiaArtsError(
+			'A bot token is required. Pass it via options.botToken.',
+		);
+	}
+
 	try {
-		// Choose API based on botToken presence
-		const data = options.botToken
-			? await fetchFromDiscord(userId, options.botToken)
-			: await fetchFromLanyard(userId);
+		const data = await fetchFromDiscord(userId, options.botToken);
 
 		const buffer = await genWelcomeBanner(data, options);
 		return buffer;

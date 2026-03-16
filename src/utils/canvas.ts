@@ -22,7 +22,7 @@ export interface SimpleCanvasDimensions {
  * Get canvas dimensions for profile cards
  */
 export function getCanvasDimensions(
-	options?: ProfileOptions & {
+	options?: Partial<ProfileOptions> & {
 		_canvasWidth?: number;
 		_canvasHeight?: number;
 		_scaleX?: number;
@@ -40,7 +40,7 @@ export function getCanvasDimensions(
  * Get canvas dimensions for welcome banners
  */
 export function getWelcomeCanvasDimensions(
-	options?: WelcomeOptions,
+	options?: Partial<WelcomeOptions>,
 ): SimpleCanvasDimensions {
 	const width = options?.customWidth ?? 1024;
 	const height = options?.customHeight ?? 500;

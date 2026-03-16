@@ -252,20 +252,17 @@ export interface ProfileOptions {
 	rankData?: RankOptions;
 
 	// API Configuration
-	/** Discord bot token for direct API access (optional, uses Lanyard if not provided) */
-	botToken?: string;
+	/** Discord bot token for direct API access (required) */
+	botToken: string;
 }
 
 // ============================================
 // WELCOME BANNER OPTIONS
 // ============================================
 
-/**
- * Welcome banner customization options
- */
 export interface WelcomeOptions {
-	/** Discord bot token for direct API access (optional, uses Lanyard if not provided) */
-	botToken?: string;
+	/** Discord bot token for direct API access (required) */
+	botToken: string;
 	// Dimensions
 	/** Canvas width in pixels */
 	customWidth?: number;
@@ -287,6 +284,8 @@ export interface WelcomeOptions {
 	avatarSize?: number;
 	/** Avatar border configuration */
 	avatarBorder?: BorderStyle;
+	/** Remove Discord avatar frame/decoration */
+	removeAvatarFrame?: boolean;
 	/** Avatar Y position offset from default */
 	avatarY?: number;
 

@@ -272,6 +272,7 @@ export async function genTextAndAvatar(
 	data: DiscordUserData,
 	options: ScaledProfileOptions,
 	avatarData: string,
+	hasFrame = false,
 ): Promise<Canvas> {
 	const {
 		global_name: globalName,
@@ -437,8 +438,8 @@ export async function genTextAndAvatar(
 
 	ctx.closePath();
 
-	// Apply avatar border if specified
-	if (avatarBorder?.width && avatarBorder?.color) {
+	// Apply avatar border if specified, and there are no overlayed decoration frames
+	if (!hasFrame && avatarBorder?.width && avatarBorder?.color) {
 		ctx.globalCompositeOperation = 'source-over';
 		ctx.strokeStyle = parseHex(avatarBorder.color);
 		ctx.lineWidth = avatarBorder.width * minScale;
@@ -604,7 +605,7 @@ async function genStatus(
  */
 export function genBadges(
 	badges: BadgeCanvas[],
-	options: ScaledProfileOptions = {},
+	options: Partial<ScaledProfileOptions> = {},
 ): Canvas {
 	const { width, height, scaleX, scaleY } = getCanvasDimensions(options);
 	const minScale = Math.min(scaleX, scaleY);

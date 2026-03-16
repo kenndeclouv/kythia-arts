@@ -166,28 +166,9 @@ npm install kythia-arts
 
 ## 🔌 API Configuration
 
-Kythia Arts supports **two ways** to fetch user data:
+Kythia Arts uses the Discord API directly to fetch full user data including badges, banners, premium info, and avatar decorations. 
 
-### Option 1: Lanyard API (Default)
-
-No configuration needed! Works out of the box for any Discord user.
-
-```typescript
-import { profileImage } from 'kythia-arts';
-
-// Uses Lanyard API by default
-const buffer = await profileImage('1158654757183959091');
-```
-
-**Limitations:**
-- No badge data
-- No banner images  
-- No premium info
-- User must be in the [Lanyard Discord server](https://discord.gg/lanyard)
-
-### Option 2: Discord API (Recommended)
-
-For full user data including badges, banners, and premium info.
+**A Discord bot token is required.**
 
 ```typescript
 import { profileImage } from 'kythia-arts';
@@ -201,11 +182,12 @@ const buffer = await profileImage('1158654757183959091', {
 
 **Requirements:**
 - Discord bot token
-- Bot must have proper permissions
+- Bot must have proper intents and permissions
 
-**Advantages:**
+**Features Available via API:**
 - ✅ Full badge data
 - ✅ Banner images
+- ✅ Avatar decorations
 - ✅ Premium info
 - ✅ Works for any user
 
@@ -335,6 +317,7 @@ Generate a beautiful welcome or goodbye banner with centered avatar and custom t
 | overlayColor | string | Color overlay on background (rgba/hex) | rgba(0,0,0,0.4) |
 | avatarSize | number | Avatar diameter in pixels | 220 |
 | avatarBorder | object | Avatar border `{ width: number, color: string }` | { width: 8, color: '#FFFFFF' } |
+| removeAvatarFrame | boolean | Remove the discord avatar frame/decoration (if any) | false |
 | avatarY | number | Avatar Y position offset | 80 |
 | welcomeText | string | Main text (e.g., "WELCOME", "GOODBYE") | WELCOME |
 | customUsername | string | Override username display | User's display name |

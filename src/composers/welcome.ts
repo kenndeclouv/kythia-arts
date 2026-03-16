@@ -2,6 +2,7 @@ import path from 'node:path';
 import { createCanvas, GlobalFonts } from '@napi-rs/canvas';
 import {
 	genWelcomeAvatar,
+	genWelcomeAvatarFrame,
 	genWelcomeBase,
 	genWelcomeText,
 } from '../renderers/welcome';
@@ -18,10 +19,19 @@ GlobalFonts.registerFromPath(
 );
 
 /**
+ * Extended user data with internal properties
+ */
+interface ExtendedUserData extends DiscordUserData {
+	decoration?: {
+		avatarFrame?: string;
+	};
+}
+
+/**
  * Generate complete welcome banner
  */
 export async function genWelcomeBanner(
-	data: DiscordUserData,
+	data: ExtendedUserData,
 	options: WelcomeOptions,
 ): Promise<Buffer> {
 	const { assets } = data;
@@ -44,9 +54,22 @@ export async function genWelcomeBanner(
 	const cardBase = await genWelcomeBase(options, backgroundImage);
 	ctx.drawImage(cardBase, 0, 0);
 
+	// Determine if avatar frame will be drawn
+	const hasFrame =
+		!options?.removeAvatarFrame && !!data?.decoration?.avatarFrame;
+
 	// Layer 2: Avatar
-	const cardAvatar = await genWelcomeAvatar(userAvatar, options);
+	const cardAvatar = await genWelcomeAvatar(userAvatar, options, hasFrame);
 	ctx.drawImage(cardAvatar, 0, 0);
+
+	// Layer 2.5: Avatar Frame
+	if (hasFrame && data.decoration?.avatarFrame) {
+		const avatarFrame = await genWelcomeAvatarFrame(
+			data.decoration.avatarFrame,
+			options,
+		);
+		ctx.drawImage(avatarFrame, 0, 0);
+	}
 
 	// Layer 3: Text (WELCOME + username)
 	const username =

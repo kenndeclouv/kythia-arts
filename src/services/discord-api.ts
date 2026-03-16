@@ -1,6 +1,7 @@
 import fetch, { FetchError } from 'node-fetch';
 import { KythiaArtsError } from '../errors';
 import type { DiscordUserData } from '../types';
+import { getBadgesFromFlags } from '../utils/badges';
 
 const DISCORD_API = 'https://discord.com/api/v10';
 const DISCORD_CDN = 'https://cdn.discordapp.com';
@@ -27,6 +28,16 @@ function getBannerURL(
 	if (!bannerHash) return null;
 	const extension = bannerHash.startsWith('a_') ? 'gif' : 'png';
 	return `${DISCORD_CDN}/banners/${userId}/${bannerHash}.${extension}`;
+}
+
+/**
+ * Build avatar decoration URL from user data
+ */
+function getAvatarDecorationURL(
+	decorationData: { asset: string; sku_id: string } | null,
+): string | null {
+	if (!decorationData?.asset) return null;
+	return `${DISCORD_CDN}/avatar-decoration-presets/${decorationData.asset}.png`;
 }
 
 /**
@@ -87,15 +98,21 @@ export async function fetchUserData(
 		const bannerURL = getBannerURL(userData.id, userData.banner);
 
 		// Add assets field for composer compatibility
-		return {
+		const result = {
 			...userData,
 			assets: {
 				avatarURL,
 				defaultAvatarURL: `${DISCORD_CDN}/embed/avatars/${Number.parseInt(userData.id, 10) % 5}.png`,
 				bannerURL,
-				badges: userData.badges || [],
+				badges: getBadgesFromFlags(userData.public_flags || 0),
+			},
+			decoration: {
+				avatarFrame:
+					getAvatarDecorationURL(userData.avatar_decoration_data) || undefined,
 			},
 		};
+
+		return result as unknown as DiscordUserData;
 	} catch (error) {
 		if (error instanceof FetchError) {
 			throw new KythiaArtsError(

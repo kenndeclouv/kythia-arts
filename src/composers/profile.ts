@@ -96,10 +96,14 @@ export async function genPng(
 	const cardFrame = await genFrame(badges, scaledOptions);
 	ctx.drawImage(cardFrame, 0, 0);
 
+	const hasFrame =
+		!scaledOptions?.removeAvatarFrame && !!data?.decoration?.avatarFrame;
+
 	const cardTextAndAvatar = await genTextAndAvatar(
 		data,
 		scaledOptions,
 		userAvatar,
+		hasFrame,
 	);
 	const textAvatarShadow = addShadow(cardTextAndAvatar);
 	ctx.drawImage(textAvatarShadow, 0, 0);
@@ -145,7 +149,7 @@ export async function genPng(
 		ctx.drawImage(xpBar, 0, 0);
 	}
 
-	if (!scaledOptions?.removeAvatarFrame && data?.decoration?.avatarFrame) {
+	if (hasFrame && data?.decoration?.avatarFrame) {
 		const avatarFrame = await genAvatarFrame(data, scaledOptions);
 		ctx.drawImage(avatarFrame, 0, 0);
 	}
