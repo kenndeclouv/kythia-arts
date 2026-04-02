@@ -4,7 +4,6 @@
 export { KythiaArtsError } from './errors';
 export { profileImage } from './generators/profile';
 export { welcomeBanner } from './generators/welcome';
-export { registerFont, loadFonts } from './utils/fonts';
 // Type exports for consumer convenience
 export type {
 	BadgePosition,
@@ -20,3 +19,4 @@ export type {
 	WelcomeType,
 	XpBarStyle,
 } from './types';
+export { loadFonts, registerFont } from './utils/fonts';

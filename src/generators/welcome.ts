@@ -32,7 +32,14 @@ export async function welcomeBanner(
 		return buffer;
 	} catch (error) {
 		if (error instanceof Error) {
-			if (error.message.includes('source rejected')) {
+			const msg = error.message.toLowerCase();
+			if (
+				msg.includes('source rejected') ||
+				msg.includes('503') ||
+				msg.includes('502') ||
+				msg.includes('504') ||
+				msg.includes('failed to load')
+			) {
 				throw new KythiaArtsError('Error loading user assets, try again later');
 			}
 			throw new KythiaArtsError(error.message);

@@ -61,11 +61,8 @@ export async function genWelcomeBase(
 		ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
 		ctx.filter = 'none';
 	} else {
-		// Default gradient background
-		const gradient = ctx.createLinearGradient(0, 0, width, height);
-		gradient.addColorStop(0, '#667eea');
-		gradient.addColorStop(1, '#764ba2');
-		ctx.fillStyle = gradient;
+		// Default solid dark color background
+		ctx.fillStyle = '#18191c';
 		ctx.fillRect(0, 0, width, height);
 	}
 

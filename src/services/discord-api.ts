@@ -6,6 +6,13 @@ import { getBadgesFromFlags } from '../utils/badges';
 const DISCORD_API = 'https://discord.com/api/v10';
 const DISCORD_CDN = 'https://cdn.discordapp.com';
 
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 500;
+const RETRYABLE_CODES = new Set([429, 502, 503, 504]);
+
+const sleep = (ms: number): Promise<void> =>
+	new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
  * Build avatar URL from user data
  */
@@ -57,75 +64,118 @@ export async function fetchUserData(
 		);
 	}
 
-	try {
-		const response = await fetch(`${DISCORD_API}/users/${userId}`, {
-			headers: {
-				Authorization: `Bot ${botToken}`,
-				'Content-Type': 'application/json',
-			},
-		});
+	let lastError: KythiaArtsError | null = null;
 
-		if (!response.ok) {
-			if (response.status === 401) {
-				throw new KythiaArtsError('Invalid bot token');
+	for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+		try {
+			const response = await fetch(`${DISCORD_API}/users/${userId}`, {
+				headers: {
+					Authorization: `Bot ${botToken}`,
+					'Content-Type': 'application/json',
+				},
+			});
+
+			if (!response.ok) {
+				// Fast-fail on non-retryable errors
+				if (response.status === 401) {
+					throw new KythiaArtsError('Invalid bot token');
+				}
+				if (response.status === 404) {
+					throw new KythiaArtsError('User not found');
+				}
+
+				if (RETRYABLE_CODES.has(response.status)) {
+					const retryAfterHeader = response.headers.get('retry-after');
+					const delayMs = retryAfterHeader
+						? Number.parseFloat(retryAfterHeader) * 1000
+						: BASE_DELAY_MS * 2 ** attempt;
+
+					const isServerError = response.status >= 500;
+					const errorMessage = isServerError
+						? 'Discord API is currently down, try again later'
+						: response.status === 429
+							? 'Discord API rate limit exceeded, try again later'
+							: `Discord API error: ${response.status} ${response.statusText}`;
+
+					lastError = new KythiaArtsError(errorMessage);
+
+					if (attempt < MAX_RETRIES - 1) {
+						await sleep(delayMs);
+						continue;
+					}
+					throw lastError;
+				}
+
+				const isServerError = response.status >= 500;
+				const errorMessage = isServerError
+					? 'Discord API is currently down, try again later'
+					: response.status === 429
+						? 'Discord API rate limit exceeded, try again later'
+						: `Discord API error: ${response.status} ${response.statusText}`;
+
+				throw new KythiaArtsError(errorMessage);
 			}
-			if (response.status === 404) {
-				throw new KythiaArtsError('User not found');
+
+			const contentType = response.headers.get('content-type');
+			if (!contentType?.includes('application/json')) {
+				throw new KythiaArtsError(
+					`Invalid response format. Expected JSON, but received: ${contentType}`,
+				);
+			}
+
+			const userData = (await response.json()) as DiscordUserData;
+
+			// Calculate created_at from Snowflake ID if not provided
+			if (!userData.created_at) {
+				userData.created_at = new Date(
+					Number.parseInt(userData.id, 10) / 4194304 + 1420070400000,
+				).toISOString();
+			}
+
+			// Build CDN URLs for compatibility with composers
+			const avatarURL = getAvatarURL(userData.id, userData.avatar);
+			const bannerURL = getBannerURL(userData.id, userData.banner);
+
+			// Add assets field for composer compatibility
+			const result = {
+				...userData,
+				assets: {
+					avatarURL,
+					defaultAvatarURL: `${DISCORD_CDN}/embed/avatars/${Number.parseInt(userData.id, 10) % 5}.png`,
+					bannerURL,
+					badges: getBadgesFromFlags(userData.public_flags || 0),
+				},
+				decoration: {
+					avatarFrame:
+						getAvatarDecorationURL(userData.avatar_decoration_data) ||
+						undefined,
+				},
+			};
+
+			return result as unknown as DiscordUserData;
+		} catch (error) {
+			if (error instanceof FetchError) {
+				lastError = new KythiaArtsError(
+					'Discord API is currently down, try again later',
+				);
+				if (attempt < MAX_RETRIES - 1) {
+					await sleep(BASE_DELAY_MS * 2 ** attempt);
+					continue;
+				}
+				throw lastError;
+			}
+			if (error instanceof KythiaArtsError) {
+				throw error;
 			}
 			throw new KythiaArtsError(
-				`Discord API error: ${response.status} ${response.statusText}`,
+				(error as Error)?.message || 'Failed to fetch user data from Discord',
 			);
 		}
-
-		const contentType = response.headers.get('content-type');
-		if (!contentType?.includes('application/json')) {
-			throw new KythiaArtsError(
-				`Invalid response format. Expected JSON, but received: ${contentType}`,
-			);
-		}
-
-		const userData = (await response.json()) as DiscordUserData;
-
-		// Calculate created_at from Snowflake ID if not provided
-		if (!userData.created_at) {
-			userData.created_at = new Date(
-				Number.parseInt(userData.id, 10) / 4194304 + 1420070400000,
-			).toISOString();
-		}
-
-		// Build CDN URLs for compatibility with composers
-		const avatarURL = getAvatarURL(userData.id, userData.avatar);
-		const bannerURL = getBannerURL(userData.id, userData.banner);
-
-		// Add assets field for composer compatibility
-		const result = {
-			...userData,
-			assets: {
-				avatarURL,
-				defaultAvatarURL: `${DISCORD_CDN}/embed/avatars/${Number.parseInt(userData.id, 10) % 5}.png`,
-				bannerURL,
-				badges: getBadgesFromFlags(userData.public_flags || 0),
-			},
-			decoration: {
-				avatarFrame:
-					getAvatarDecorationURL(userData.avatar_decoration_data) || undefined,
-			},
-		};
-
-		return result as unknown as DiscordUserData;
-	} catch (error) {
-		if (error instanceof FetchError) {
-			throw new KythiaArtsError(
-				'Discord API is currently down, try again later',
-			);
-		}
-		if (error instanceof KythiaArtsError) {
-			throw error;
-		}
-		throw new KythiaArtsError(
-			(error as Error)?.message || 'Failed to fetch user data from Discord',
-		);
 	}
+
+	throw (
+		lastError ?? new KythiaArtsError('Failed to fetch user data from Discord')
+	);
 }
 
 export default fetchUserData;

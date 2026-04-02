@@ -103,53 +103,41 @@ export async function getBadges(
  */
 export async function genBase(
 	options: ScaledProfileOptions,
-	avatarData: string,
+	_avatarData: string,
 	bannerData: string | null,
 ): Promise<Canvas> {
-	const { width, height, scaleX, scaleY } = getCanvasDimensions(options);
+	const { width, height } = getCanvasDimensions(options);
 	const canvas = createCanvas(width, height);
 	const ctx = canvas.getContext('2d');
 
-	let isBannerLoaded = true;
-	let cardBackground = await loadImage(
-		options?.customBackground
+	let cardBackground: Image | undefined;
+
+	if (options?.customBackground || bannerData) {
+		const bgStr = options?.customBackground
 			? parseImg(options.customBackground)
-			: (bannerData ?? avatarData),
-	).catch(() => undefined);
-
-	if (!cardBackground) {
-		cardBackground = await loadImage(avatarData).catch(() => undefined);
-		isBannerLoaded = false;
+			: bannerData;
+		if (bgStr) {
+			cardBackground = await loadImage(bgStr).catch(() => undefined);
+		}
 	}
-
-	if (!cardBackground) {
-		throw new KythiaArtsError('Failed to load background image');
-	}
-
-	const condAvatar = options?.customBackground
-		? true
-		: !isBannerLoaded
-			? false
-			: bannerData !== null;
-	const wX = condAvatar ? width : 900 * scaleX;
-	const wY = condAvatar ? height : wX;
-	const cY = condAvatar ? 0 : -345 * scaleY;
 
 	ctx.fillStyle = '#18191c';
 	ctx.beginPath();
 	ctx.fillRect(0, 0, width, height);
 	ctx.fill();
 
-	ctx.filter =
-		(options?.moreBackgroundBlur
-			? 'blur(9px)'
-			: options?.disableBackgroundBlur
-				? 'blur(0px)'
-				: 'blur(3px)') +
-		(options?.backgroundBrightness
-			? ` brightness(${options.backgroundBrightness + 100}%)`
-			: '');
-	ctx.drawImage(cardBackground, 0, cY, wX, wY);
+	if (cardBackground) {
+		ctx.filter =
+			(options?.moreBackgroundBlur
+				? 'blur(9px)'
+				: options?.disableBackgroundBlur
+					? 'blur(0px)'
+					: 'blur(3px)') +
+			(options?.backgroundBrightness
+				? ` brightness(${options.backgroundBrightness + 100}%)`
+				: '');
+		ctx.drawImage(cardBackground, 0, 0, width, height);
+	}
 
 	// Apply customizable overlay color
 	const overlayColor = options?.overlayColor ?? 'rgba(42, 45, 51, 0.2)';

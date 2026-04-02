@@ -46,9 +46,9 @@ export async function genWelcomeBanner(
 	// Get user avatar (high quality)
 	const userAvatar = `${assets?.avatarURL ?? assets?.defaultAvatarURL}?size=512`;
 
-	// Get background image (custom or banner or avatar)
+	// Get background image (custom or banner)
 	const backgroundImage =
-		options?.customBackground ?? assets?.bannerURL ?? userAvatar;
+		options?.customBackground ?? assets?.bannerURL ?? undefined;
 
 	// Layer 1: Background
 	const cardBase = await genWelcomeBase(options, backgroundImage);
