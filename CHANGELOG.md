@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2-beta](https://github.com/kenndeclouv/kythia-arts/compare/v0.1.1-beta...v0.1.2-beta) (2026-04-02)
+
+
+### Features
+
+* implement retry logic for Discord API requests and refactor background image rendering for profile and welcome components. ([f9e17dc](https://github.com/kenndeclouv/kythia-arts/commit/f9e17dc1c4d9183c29a57260d687c531a204e2bc))
+
 ### 0.1.1-beta (2026-03-16)
 
 
