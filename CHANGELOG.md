@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3-beta](https://github.com/kenndeclouv/kythia-arts/compare/v0.1.2-beta...v0.1.3-beta) (2026-04-05)
+
 ### [0.1.2-beta](https://github.com/kenndeclouv/kythia-arts/compare/v0.1.1-beta...v0.1.2-beta) (2026-04-02)
 
 
