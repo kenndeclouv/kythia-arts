@@ -35,7 +35,8 @@ export async function genWelcomeBase(
 			ctx.filter += ` brightness(${options.backgroundBrightness + 100}%)`;
 		}
 
-		// Draw background image (cover fit)
+		// Cover-fit: scale the image so it fills the canvas, preserving aspect ratio.
+		// Extra pixels are cropped; the image is never stretched.
 		const imgRatio = bgImage.width / bgImage.height;
 		const canvasRatio = width / height;
 
@@ -45,20 +46,26 @@ export async function genWelcomeBase(
 		let offsetY: number;
 
 		if (imgRatio > canvasRatio) {
-			// Image is wider
-			drawHeight = height;
-			drawWidth = height * imgRatio;
+			// Image is wider than canvas — fit to height, crop sides
+			drawHeight = height + blurAmount * 2; // extend slightly so blur edge is hidden
+			drawWidth = drawHeight * imgRatio;
 			offsetX = (width - drawWidth) / 2;
-			offsetY = 0;
+			offsetY = -blurAmount;
 		} else {
-			// Image is taller
-			drawWidth = width;
-			drawHeight = width / imgRatio;
-			offsetX = 0;
+			// Image is taller than canvas — fit to width, crop top/bottom
+			drawWidth = width + blurAmount * 2;
+			drawHeight = drawWidth / imgRatio;
+			offsetX = -blurAmount;
 			offsetY = (height - drawHeight) / 2;
 		}
 
+		// Clip to canvas bounds so blurred edges don't bleed to transparent
+		ctx.save();
+		ctx.beginPath();
+		ctx.rect(0, 0, width, height);
+		ctx.clip();
 		ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+		ctx.restore();
 		ctx.filter = 'none';
 	} else {
 		// Default solid dark color background

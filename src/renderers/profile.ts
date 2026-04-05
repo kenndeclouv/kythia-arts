@@ -127,16 +127,55 @@ export async function genBase(
 	ctx.fill();
 
 	if (cardBackground) {
-		ctx.filter =
-			(options?.moreBackgroundBlur
+		const blurFilter =
+			options?.moreBackgroundBlur
 				? 'blur(9px)'
 				: options?.disableBackgroundBlur
 					? 'blur(0px)'
-					: 'blur(3px)') +
+					: 'blur(3px)';
+		const blurAmount = options?.moreBackgroundBlur
+			? 9
+			: options?.disableBackgroundBlur
+				? 0
+				: 3;
+		ctx.filter =
+			blurFilter +
 			(options?.backgroundBrightness
 				? ` brightness(${options.backgroundBrightness + 100}%)`
 				: '');
-		ctx.drawImage(cardBackground, 0, 0, width, height);
+
+		// Cover-fit: scale the image so it fills the canvas, preserving aspect ratio.
+		// Extra pixels are cropped; the image is never stretched.
+		const imgRatio = cardBackground.width / cardBackground.height;
+		const canvasRatio = width / height;
+
+		let drawWidth: number;
+		let drawHeight: number;
+		let offsetX: number;
+		let offsetY: number;
+
+		if (imgRatio > canvasRatio) {
+			// Image is wider than canvas — fit to height, crop sides
+			drawHeight = height + blurAmount * 2;
+			drawWidth = drawHeight * imgRatio;
+			offsetX = (width - drawWidth) / 2;
+			offsetY = -blurAmount;
+		} else {
+			// Image is taller than canvas — fit to width, crop top/bottom
+			drawWidth = width + blurAmount * 2;
+			drawHeight = drawWidth / imgRatio;
+			offsetX = -blurAmount;
+			offsetY = (height - drawHeight) / 2;
+		}
+
+		// Clip to canvas bounds so blurred edges don't bleed to transparent
+		ctx.save();
+		ctx.beginPath();
+		ctx.rect(0, 0, width, height);
+		ctx.clip();
+		ctx.drawImage(cardBackground, offsetX, offsetY, drawWidth, drawHeight);
+		ctx.restore();
+		ctx.filter = 'none';
 	}
 
 	// Apply customizable overlay color
