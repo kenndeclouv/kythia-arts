@@ -197,8 +197,9 @@ export function genWelcomeText(
 	const avatarSize = options?.avatarSize ?? 220;
 	const avatarY = options?.avatarY ?? 80;
 	const textOffsetY = options?.textOffsetY ?? 0;
-	const welcomeY = avatarY + avatarSize + (customFontSize * 0.8) + 20 + textOffsetY; // Below avatar + offset
-	const usernameY = welcomeY + (customUsernameSize * 0.8) + 15; // Below welcome text
+	const welcomeY =
+		avatarY + avatarSize + customFontSize * 0.8 + 20 + textOffsetY; // Below avatar + offset
+	const usernameY = welcomeY + customUsernameSize * 0.8 + 15; // Below welcome text
 
 	// Apply text shadow if enabled
 	if (textShadow) {

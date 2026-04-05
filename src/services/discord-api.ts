@@ -125,10 +125,12 @@ export async function fetchUserData(
 
 			const userData = (await response.json()) as DiscordUserData;
 
-			// Calculate created_at from Snowflake ID if not provided
+			// Calculate created_at from Snowflake ID if not provided.
+			// Must use BigInt — Discord IDs are 64-bit and lose precision with parseInt.
+			// Shift right by 22 bits (4194304 = 2^22) to extract the timestamp.
 			if (!userData.created_at) {
 				userData.created_at = new Date(
-					Number.parseInt(userData.id, 10) / 4194304 + 1420070400000,
+					Number(BigInt(userData.id) >> 22n) + 1420070400000,
 				).toISOString();
 			}
 

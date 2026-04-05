@@ -127,12 +127,11 @@ export async function genBase(
 	ctx.fill();
 
 	if (cardBackground) {
-		const blurFilter =
-			options?.moreBackgroundBlur
-				? 'blur(9px)'
-				: options?.disableBackgroundBlur
-					? 'blur(0px)'
-					: 'blur(3px)';
+		const blurFilter = options?.moreBackgroundBlur
+			? 'blur(9px)'
+			: options?.disableBackgroundBlur
+				? 'blur(0px)'
+				: 'blur(3px)';
 		const blurAmount = options?.moreBackgroundBlur
 			? 9
 			: options?.disableBackgroundBlur
