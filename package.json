@@ -1,6 +1,6 @@
 {
 	"name": "kythia-arts",
-	"version": "0.1.3-beta",
+	"version": "1.0.0-rc.1",
 	"description": "Kythia Arts is a library for creating custom cards with Discord style",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",

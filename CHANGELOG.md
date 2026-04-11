@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0-rc.1](https://github.com/kenndeclouv/kythia-arts/compare/v0.1.3-beta...v1.0.0-rc.1) (2026-04-11)
+
+
+### Features
+
+* improve badge rendering quality and update icons to custom repository assets ([948d7b9](https://github.com/kenndeclouv/kythia-arts/commit/948d7b91137ad0ee033e0e129d18a28be0566ffa))
+
 ### [0.1.3-beta](https://github.com/kenndeclouv/kythia-arts/compare/v0.1.2-beta...v0.1.3-beta) (2026-04-05)
 
 ### [0.1.2-beta](https://github.com/kenndeclouv/kythia-arts/compare/v0.1.1-beta...v0.1.2-beta) (2026-04-02)
