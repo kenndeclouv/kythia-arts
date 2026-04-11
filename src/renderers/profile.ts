@@ -671,10 +671,20 @@ export function genBadges(
 		ctx.globalAlpha = badgeOpacity;
 
 		// Calculate x position based on alignment
-		const xPos = isLeftAlign ? x : x + scaledBX;
-		const yPos = startY + (bY !== 15 ? scaledBY : 0);
+		const xPos = Math.round(isLeftAlign ? x : x + scaledBX);
+		const yPos = Math.round(startY + (bY !== 15 ? scaledBY : 0));
 
-		ctx.drawImage(badgeCanvas, xPos, yPos, scaledW, scaledW);
+		// Ensure high quality rendering
+		ctx.imageSmoothingEnabled = true;
+		ctx.imageSmoothingQuality = 'high';
+
+		ctx.drawImage(
+			badgeCanvas,
+			xPos,
+			yPos,
+			Math.round(scaledW),
+			Math.round(scaledW),
+		);
 
 		// Move to next badge position
 		x += isLeftAlign ? badgeSpacing : -badgeSpacing;
